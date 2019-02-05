@@ -11,7 +11,7 @@
 # XXX:   Type: @PROJECT_TYPE@
 
 [hypervisor.qemu]
-path = "@QEMUPATH@"
+path = "/usr/bin/qemu-system-kata-ppc64"
 kernel = "@KERNELPATH_QEMU@"
 initrd = "@INITRDPATH@"
 image = "@IMAGEPATH@"
