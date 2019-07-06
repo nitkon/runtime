@@ -700,6 +700,11 @@ func (k *kataAgent) setProxyFromGrpc(proxy proxy, pid int, url string) {
 	k.state.URL = url
 }
 
+type Ann struct {
+		key  string
+		val string
+	}
+
 func (k *kataAgent) startSandbox(sandbox *Sandbox) error {
 	span, _ := k.trace("startSandbox")
 	defer span.Finish()
@@ -715,6 +720,34 @@ func (k *kataAgent) startSandbox(sandbox *Sandbox) error {
 		}
 	}()
 
+	k.Logger().Debugf("SANDBOX.CONFIG.Annotations  %v", (sandbox.config.Annotations))
+
+	sandbox.Logger().Info("123456NEW SANDBOX.CONFIG.Annotations  %v", sandbox.config.Annotations["com.github.containers.virtcontainers.pkg.oci.config"])
+
+	abcd := sandbox.config.Annotations["com.github.containers.virtcontainers.pkg.oci.config"]
+	sandbox.Logger().Info("123123 %T", abcd)
+	sandbox.Logger().Info("BLACKSHEEP2424 %v", abcd[0])
+
+//	var rex = regexp.MustCompile("(\\w+):(\\w+)")
+	//var ann []Ann
+//	q := []byte(abcd)
+//	oci := &Ann{}
+//	err = json.Unmarshal(q, oci)
+//	sandbox.Logger().Info("MONDAY-TUESDAY %v", oci)
+//	abcd := sandbox.config.Annotations["com.github.containers.virtcontainers.pkg.oci.config"]
+//	 sandbox.Logger().Info("BLACKSHEEP %v", abcd["annotations"])
+
+//	var ociSpec CompatOCISpec
+//	if err := json.Unmarshal([]byte(abcd), &ociSpec); err != nil {
+//	sandbox.Logger().Info("BLACKSHEEP1212 %v", ociSpec)
+//}
+/*
+	ociSpec := &specs.Spec{}
+	if _ = json.Unmarshal([]byte(abcd), ociSpec); err != nil {
+		sandbox.Logger().Info("BLACKSHEEP ERROR")
+	}
+	sandbox.Logger().Info("BLACKSHEEP NO ERROR %v", ociSpec)
+*/
 	hostname := sandbox.config.Hostname
 	if len(hostname) > maxHostnameLen {
 		hostname = hostname[:maxHostnameLen]
@@ -795,6 +828,7 @@ func (k *kataAgent) startSandbox(sandbox *Sandbox) error {
 		SandboxPidns:  sandbox.sharePidNs,
 		SandboxId:     sandbox.id,
 		GuestHookPath: sandbox.config.HypervisorConfig.GuestHookPath,
+		Annotations: sandbox.config.Annotations,
 	}
 
 	_, err = k.sendReq(req)

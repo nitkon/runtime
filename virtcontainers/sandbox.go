@@ -658,7 +658,7 @@ func unlockSandbox(ctx context.Context, sandboxID, token string) error {
 
 // fetchSandbox fetches a sandbox config from a sandbox ID and returns a sandbox.
 func fetchSandbox(ctx context.Context, sandboxID string) (sandbox *Sandbox, err error) {
-	virtLog.Info("fetch sandbox")
+	virtLog.Info("123fetch sandbox")
 	if sandboxID == "" {
 		return nil, vcTypes.ErrNeedSandboxID
 	}
@@ -957,8 +957,9 @@ func (s *Sandbox) startVM() (err error) {
 	span, ctx := s.trace("startVM")
 	defer span.Finish()
 
-	s.Logger().Info("Starting VM")
-
+	s.Logger().Info("Starting VM123")
+	s.Logger().Info("NEW SANDBOX.CONFIG.Annotations  %v", (s.config.Annotations))
+	virtLog.Info("NEW SANDBOX.CONFIG.Annotations  %v", (s.config.Annotations))
 	if err := s.network.Run(s.networkNS.NetNsPath, func() error {
 		if s.factory != nil {
 			vm, err := s.factory.GetVM(ctx, VMConfig{

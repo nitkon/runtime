@@ -51,8 +51,10 @@
   revision = "b3e7a9e78463a10f2a19e1a966c76a3afb215781"
 
 [[constraint]]
-  name = "github.com/kata-containers/agent"
-  revision = "48dd1c031530fce9bf16b0f6a7305979cedd8fc9"
+#  name = "github.com/kata-containers/agent"
+#  revision = "714bf625cc68505f31d802f98b84bf2b8006e146"
+	name = "github.com/nitkon/agent/tree/annotation"
+	revision = "b15ee5bc610132007138899d1112a9b3c595ec1c"
 
 [[constraint]]
   name = "github.com/containerd/cri-containerd"

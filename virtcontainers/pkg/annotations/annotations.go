@@ -49,6 +49,7 @@ const (
 
 	// ContainerTypeKey is the annotation key to fetch container type.
 	ContainerTypeKey = vcAnnotationsPrefix + "pkg.oci.container_type"
+
 )
 
 const (
