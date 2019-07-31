@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -792,6 +794,23 @@ func (k *kataAgent) startSandbox(sandbox *Sandbox) error {
 
 		storages = append(storages, shmStorage)
 	}
+
+	dir := path.Join(kataHostSharedDir, sandbox.id)
+	logrus.Printf("June 31 dir is %s", dir)
+
+	if _, err = os.Stat(dir); err != nil {
+		if os.IsNotExist(err) {
+			logrus.Printf("1212FILE DOES NOT EXISTS %s", err)
+		} else {
+			logrus.Printf("1313FILE DOES EXISTS %s", err)
+		}
+	}
+
+	out, err := exec.Command("ls", "-lrt", dir).Output()
+	if err != nil {
+		logrus.Printf("1212ERROR EXECUTING ls -lrt %s", err)
+	}
+	logrus.Printf("1313JUNE 31 The RESULT IS %s\n", out)
 
 	req := &grpc.CreateSandboxRequest{
 		Hostname:      hostname,
