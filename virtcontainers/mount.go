@@ -301,7 +301,7 @@ func bindMountContainerRootfs(ctx context.Context, sharedDir, sandboxID, cID, cR
 	defer span.Finish()
 
 	rootfsDest := filepath.Join(sharedDir, sandboxID, cID, rootfsDir)
-
+	logrus.Printf("AUG 06 BIND MOUNTING %v to %v", cRootFs, rootfsDest)
 	return bindMount(ctx, cRootFs, rootfsDest, readonly)
 }
 

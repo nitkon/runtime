@@ -706,6 +706,40 @@ func (k *kataAgent) setProxyFromGrpc(proxy proxy, pid int, url string) {
 	k.state.URL = url
 }
 
+func (k *kataAgent) getDNS(sandbox *Sandbox) (error, []string) {
+	ociSpecJSON, ok := sandbox.config.Annotations[vcAnnotations.ConfigJSONKey]
+	if !ok {
+		return errorMissingOCISpec, nil
+	}
+	logrus.Printf("ociSpecJson is %v", ociSpecJSON)
+	//var dns []string
+	ociSpec := &specs.Spec{}
+	if err := json.Unmarshal([]byte(ociSpecJSON), ociSpec); err != nil {
+		logrus.Printf("ERROR ERROR ERROR")
+		return err, nil
+	}
+
+	ociMounts := ociSpec.Mounts
+
+	for _, m := range ociMounts {
+		logrus.Printf("ociMounts are %v", m.Destination)
+		if m.Destination == "/etc/resolv.conf" {
+			logrus.Printf("RESOLV.CONF %v", m.Source)
+			content, err := ioutil.ReadFile(m.Source)
+			if err != nil {
+				return fmt.Errorf("Could not read file %s", m.Source), nil
+				logrus.Printf("ERROR 123")
+			}
+			logrus.Printf("CONTENT IS %v", string(content))
+			dns := strings.Split(string(content), "\n")
+			logrus.Printf("DNS DNS DNS is %v", dns)
+			return nil, dns
+
+		}
+	}
+	return fmt.Errorf("Could not find DNS file listed in ociMounts"), nil
+}
+
 func (k *kataAgent) startSandbox(sandbox *Sandbox) error {
 	span, _ := k.trace("startSandbox")
 	defer span.Finish()
@@ -720,12 +754,50 @@ func (k *kataAgent) startSandbox(sandbox *Sandbox) error {
 			k.proxy.stop(k.state.ProxyPid)
 		}
 	}()
-
 	hostname := sandbox.config.Hostname
 	if len(hostname) > maxHostnameLen {
 		hostname = hostname[:maxHostnameLen]
 	}
 
+	err, dns := k.getDNS(sandbox)
+	if err != nil || len(dns) == 0 {
+		return err
+	}
+	logrus.Printf("DNS IN startSandbox is %v", dns)
+	/*
+		ociSpecJSON, ok := sandbox.config.Annotations[vcAnnotations.ConfigJSONKey]
+		if !ok {
+			logrus.Printf("error error error ")
+		}
+		logrus.Printf("ociSpecJson is %v", ociSpecJSON)
+		//var dns []string
+		ociSpec := &specs.Spec{}
+		if err = json.Unmarshal([]byte(ociSpecJSON), ociSpec); err != nil {
+			logrus.Printf("ERROR ERROR ERROR")
+		}
+
+		ociMounts := ociSpec.Mounts
+
+		for _, m := range ociMounts {
+			logrus.Printf("ociMounts are %v", m.Destination)
+			if m.Destination == "/etc/resolv.conf" {
+				logrus.Printf("RESOLV.CONF %v", m.Source)
+				if _, err := os.Stat(m.Source); os.IsNotExist(err) {
+					logrus.Printf("FILE DOES NOT EXIST")
+				} else {
+					logrus.Printf("YES FILE EXIST")
+				}
+				content, err := ioutil.ReadFile(m.Source)
+				if err != nil {
+					logrus.Printf("ERROR 123")
+				}
+				logrus.Printf("CONTENT IS %v", string(content))
+				dns := strings.Split(string(content), "\n")
+				logrus.Printf("DNS DNS DNS is %v", dns)
+
+			}
+		}
+	*/
 	// check grpc server is serving
 	if err = k.check(); err != nil {
 		return err
@@ -804,7 +876,8 @@ func (k *kataAgent) startSandbox(sandbox *Sandbox) error {
 	}
 
 	req := &grpc.CreateSandboxRequest{
-		Hostname:      hostname,
+		Hostname: hostname,
+		Dns:		dns,
 		Storages:      storages,
 		SandboxPidns:  sandbox.sharePidNs,
 		SandboxId:     sandbox.id,
